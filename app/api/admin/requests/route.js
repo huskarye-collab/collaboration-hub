@@ -1,5 +1,4 @@
-
-import { db, isAdmin } from "@/lib/server";
+import { getDb, isAdmin } from "@/lib/server";
 
 export const runtime = "nodejs";
 
@@ -11,12 +10,15 @@ export async function GET(request) {
     );
   }
 
+  const db = await getDb();
+
   const { data, error } = await db
     .from("collaboration_requests")
     .select("*")
     .order("created_at", { ascending: false });
 
   if (error) {
+    console.error("Database error:", error);
     return Response.json(
       { error: "Database error" },
       { status: 500 }
@@ -35,6 +37,7 @@ export async function PATCH(request) {
   }
 
   try {
+    const db = await getDb();
     const { id, status } = await request.json();
 
     if (
@@ -55,8 +58,8 @@ export async function PATCH(request) {
     if (error) throw error;
 
     return Response.json({ success: true });
-
-  } catch {
+  } catch (error) {
+    console.error("Request update error:", error);
     return Response.json(
       { error: "Update failed" },
       { status: 500 }
