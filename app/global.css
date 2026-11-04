@@ -1,0 +1,247 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #090d19;
+  color: white;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+.public {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% 10%, #243d75 0%, #101a35 35%, #090d19 75%);
+}
+
+.nav {
+  padding: 25px 8%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  font-weight: 900;
+  font-size: 23px;
+  letter-spacing: 2px;
+}
+
+.brand span, .hero h1 span {
+  color: #8b9fff;
+}
+
+.nav a {
+  color: white;
+  text-decoration: none;
+}
+
+.hero {
+  max-width: 650px;
+  margin: 65px auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.tag {
+  color: #9daeff;
+  letter-spacing: 3px;
+  font-size: 12px;
+}
+
+.hero h1 {
+  font-size: clamp(38px, 8vw, 65px);
+  line-height: 1.1;
+}
+
+.hero > p, .muted {
+  color: #aab4ca;
+  line-height: 1.6;
+}
+
+.request-card, .login-card {
+  text-align: left;
+  background: #141d31;
+  border: 1px solid #334363;
+  border-radius: 18px;
+  padding: 28px;
+  margin-top: 40px;
+}
+
+.request-card h2 {
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin: 20px 0 8px;
+  color: #dce4ff;
+  font-size: 14px;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #35445e;
+  border-radius: 9px;
+  background: #0c1425;
+  color: white;
+  outline: none;
+}
+
+textarea {
+  resize: vertical;
+}
+
+button {
+  border: 0;
+  border-radius: 9px;
+  padding: 14px 20px;
+  margin-top: 20px;
+  background: #7189ff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.request-card button {
+  width: 100%;
+}
+
+.result {
+  margin-top: 15px;
+  color: #a9ffcb;
+}
+
+footer {
+  text-align: center;
+  padding: 30px;
+  color: #8490a9;
+}
+
+.admin {
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 20px;
+}
+
+.login-card {
+  max-width: 420px;
+  margin: 100px auto;
+}
+
+.login-card p {
+  color: #aab4ca;
+}
+
+.login-card button {
+  width: 100%;
+}
+
+.dashboard-header, .request-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 30px 0;
+}
+
+.stats div, .request-item {
+  background: #141d31;
+  border: 1px solid #334363;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.stats b {
+  display: block;
+  font-size: 30px;
+}
+
+.stats span, small {
+  color: #aab4ca;
+}
+
+.request-item {
+  margin: 18px 0;
+}
+
+.request-item p {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.message {
+  white-space: pre-wrap;
+}
+
+.status {
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: #34415c;
+  font-size: 12px;
+}
+
+.status.accepted {
+  color: #85ffb0;
+}
+
+.status.denied {
+  color: #ff9999;
+}
+
+.status.pending {
+  color: #ffda80;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.actions .deny {
+  background: #a94353;
+}
+
+@media(max-width: 550px) {
+  .hero {
+    margin-top: 30px;
+  }
+
+  .request-card {
+    padding: 20px;
+  }
+
+  .admin {
+    margin: 20px auto;
+  }
+
+  .stats {
+    gap: 8px;
+  }
+
+  .stats div {
+    padding: 12px;
+  }
+
+  .stats b {
+    font-size: 23px;
+  }
+}
