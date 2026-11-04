@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,45 +7,61 @@ export default function Admin() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [requests, setRequests] = useState([]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function loadRequests() {
-    const response = await fetch("/api/admin/requests");
-    const data = await response.json();
+    try {
+      const response = await fetch("/api/admin/requests");
+      const data = await response.json();
 
-    if (!response.ok) {
-      setLoggedIn(false);
-      return;
+      if (!response.ok) {
+        setLoggedIn(false);
+        return;
+      }
+
+      setRequests(data.requests);
+      setLoggedIn(true);
+    } catch {
+      setError("Could not load requests.");
     }
-
-    setRequests(data.requests);
-    setLoggedIn(true);
   }
 
   async function login(e) {
     e.preventDefault();
+
+    if (loading) return;
+
+    setLoading(true);
     setError("");
 
-    const response = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ password })
-    });
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password })
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      setError(data.error || "Login failed.");
-      return;
+      if (!response.ok) {
+        setError(data.error || "Login failed.");
+        setLoading(false);
+        return;
+      }
+
+      await loadRequests();
+      setPassword("");
+    } catch {
+      setError("Connection error. Please try again.");
     }
 
-    setPassword("");
-    await loadRequests();
+    setLoading(false);
   }
 
   async function update(id, status) {
     const response = await fetch("/api/admin/requests", {
       method: "PATCH",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, status })
     });
 
@@ -61,6 +76,7 @@ export default function Admin() {
     await fetch("/api/admin/logout", { method: "POST" });
     setLoggedIn(false);
     setRequests([]);
+    setPassword("");
   }
 
   useEffect(() => {
@@ -82,24 +98,19 @@ export default function Admin() {
             onChange={e => setPassword(e.target.value)}
           />
 
-          <button>Login →</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login →"}
+          </button>
+
           {error && <p>{error}</p>}
         </form>
       </main>
     );
   }
 
-  const pending = requests.filter(
-    r => r.status === "pending"
-  ).length;
-
-  const accepted = requests.filter(
-    r => r.status === "accepted"
-  ).length;
-
-  const denied = requests.filter(
-    r => r.status === "denied"
-  ).length;
+  const pending = requests.filter(r => r.status === "pending").length;
+  const accepted = requests.filter(r => r.status === "accepted").length;
+  const denied = requests.filter(r => r.status === "denied").length;
 
   return (
     <main className="admin">
@@ -125,25 +136,20 @@ export default function Admin() {
         <article className="request-item" key={r.id}>
           <div className="request-top">
             <h3>{r.username}</h3>
-            <span className={"status " + r.status}>
-              {r.status}
-            </span>
+            <span className={"status " + r.status}>{r.status}</span>
           </div>
 
           <p><b>Platform:</b> {r.platform}</p>
           <p><b>Contact:</b> {r.contact}</p>
           <p className="message">{r.message}</p>
 
-          <small>
-            {new Date(r.created_at).toLocaleString()}
-          </small>
+          <small>{new Date(r.created_at).toLocaleString()}</small>
 
           {r.status === "pending" && (
             <div className="actions">
               <button onClick={() => update(r.id, "accepted")}>
                 Accept
               </button>
-
               <button
                 className="deny"
                 onClick={() => update(r.id, "denied")}
