@@ -1,11 +1,11 @@
 
-import { db } from "@/lib/server";
+import { getDb } from "@/lib/server";
 import { Resend } from "resend";
-
-export const runtime = "nodejs";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export async function POST(request) {
   try {
+    const { env } = getCloudflareContext();
     const body = await request.json();
 
     const username = String(body.username || "").trim();
@@ -14,9 +14,12 @@ export async function POST(request) {
     const message = String(body.message || "").trim();
 
     if (
-      username.length < 2 || username.length > 50 ||
-      contact.length < 3 || contact.length > 150 ||
-      message.length < 10 || message.length > 2000 ||
+      username.length < 2 ||
+      username.length > 50 ||
+      contact.length < 3 ||
+      contact.length > 150 ||
+      message.length < 10 ||
+      message.length > 2000 ||
       !["YouTube", "Discord", "Roblox", "Other"].includes(platform)
     ) {
       return Response.json(
@@ -25,21 +28,36 @@ export async function POST(request) {
       );
     }
 
+    const db = await getDb();
+
     const { data, error } = await db
-      .from("collaboration_requests")
-      .insert({ username, contact, platform, message })
+      .from("collaboration-hub")
+      .insert({
+        username,
+        contact,
+        platform,
+        message
+      })
       .select("id")
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase submission error:", error);
+      throw error;
+    }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    if (
+      env.RESEND_API_KEY &&
+      env.EMAIL_FROM &&
+      env.OWNER_EMAIL
+    ) {
+      const resend = new Resend(env.RESEND_API_KEY);
 
-    const email = await resend.emails.send({
-      from: process.env.EMAIL_FROM,
-      to: process.env.OWNER_EMAIL,
-      subject: "New Collaboration Request!",
-      text: `
+      const email = await resend.emails.send({
+        from: env.EMAIL_FROM,
+        to: env.OWNER_EMAIL,
+        subject: "New Collaboration Request!",
+        text: `
 Username: ${username}
 Contact: ${contact}
 Platform: ${platform}
@@ -49,10 +67,11 @@ ${message}
 
 Request ID: ${data.id}
 `
-    });
+      });
 
-    if (email.error) {
-      console.error("Email notification failed:", email.error);
+      if (email.error) {
+        console.error("Email notification failed:", email.error);
+      }
     }
 
     return Response.json({
@@ -61,7 +80,7 @@ Request ID: ${data.id}
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Submission error:", error);
 
     return Response.json(
       { error: "Something went wrong." },
